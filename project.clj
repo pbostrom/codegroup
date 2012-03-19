@@ -1,3 +1,8 @@
+(defn cljs-home [path]
+    (if-let [home (get (System/getenv) "CLOJURESCRIPT_HOME")]
+          (str home path)
+          (throw (Exception. "You must set the $CLOJURESCRIPT_HOME variable!"))))
+
 (defproject codegroup "1.0.0-SNAPSHOT"
   :description "FIXME: write description"
   :dependencies [[org.clojure/clojure "1.3.0"]
@@ -6,6 +11,7 @@
                  [hiccup "1.0.0-beta1"]
                  [domina "1.0.0-beta1"]]
   :plugins [[lein-cljsbuild "0.1.2"]]
+  :extra-classpath-dirs ~(map cljs-home ["/lib/*" "/src/clj" "/src/cljs"])
   :cljsbuild {
     :builds [{:source-path "src-cljs"
               :compiler {:output-to "resources/public/js/bootstrap.js"

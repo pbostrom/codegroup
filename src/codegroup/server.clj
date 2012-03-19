@@ -16,9 +16,10 @@
 (defn layout [& content]
   (html5 [:head [:title "new page"]
           (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
-          (include-js "js/bootstrap.js")
-          (include-css "css/main.css")]
-         [:body content]))
+          (include-css "/css/main.css")]
+         [:body content]
+         (include-js "/js/bootstrap.js")
+         [:script {:type "text/javascript"} "goog.require('myrepl')"]))
 
 (def main-view 
   [:div#wrapper [:div#container 

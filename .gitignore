@@ -1,4 +1,5 @@
 /pom.xml
+*.swp
 *jar
 /lib
 /classes
@@ -8,3 +9,4 @@
 /.lein-deps-sum
 /.lein-cljsbuild*
 /.lein-plugins
+/.repl

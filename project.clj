@@ -1,0 +1,14 @@
+(defproject codegroup "1.0.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :dependencies [[org.clojure/clojure "1.3.0"]
+                 [aleph "0.2.1-beta1"]
+                 [compojure "1.0.1"]
+                 [hiccup "1.0.0-beta1"]
+                 [domina "1.0.0-beta1"]]
+  :plugins [[lein-cljsbuild "0.1.2"]]
+  :cljsbuild {
+    :builds [{:source-path "src-cljs"
+              :compiler {:output-to "resources/public/js/bootstrap.js"
+                         :optimizations :whitespace
+                         :pretty-print true}}]}
+  :main codegroup.server)

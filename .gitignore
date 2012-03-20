@@ -1,5 +1,5 @@
 /pom.xml
-*.swp
+.*.swp
 *jar
 /lib
 /classes
@@ -10,3 +10,4 @@
 /.lein-cljsbuild*
 /.lein-plugins
 /.repl
+resources/public/js/bootstrap.js

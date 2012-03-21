@@ -6,14 +6,9 @@
             [clojure.browser.event :as event]))
 
 (defn add-msg [msg-el]
-  (gdom/append (sel "#chatLog") msg-el))
+  (gdom/append (dm/single-node (dmc/sel "#chatLog")) msg-el))
 
 
-(event/listen (dm/single-node (dmc/sel "#text"))
-              :keypress
-              (fn [e]
-                (if (= (.-keyCode e) 13)
-                  (js/alert "Hey You"))))
                 
 ;          $('#text').keypress(function(event) {
 ;              if (event.keyCode == '13') {
@@ -22,8 +17,20 @@
 ;          });	
 (def ws-url "ws://localhost:8080/socket")
 (def socket (js/WebSocket. ws-url))
+(add-msg (crate/html [:p.event "Socket Status: " + (str (.-readyState socket))]))
+(set! (.-onopen socket)
+      #(add-msg 
+         (crate/html [:p.event "Socket Status: " + (str (.-readyState socket)) + " (open)"])))
 
+(set! (.-onmessage socket)
+      (fn add-msg [msg]
+         (crate/html [:p.event "Received: " + (.-data msg)])))
 
+(event/listen (dm/single-node (dmc/sel "#text"))
+              :keypress
+              (fn [e]
+                (if (= (.-keyCode e) 13)
+                  (send-it))))
 ;          function message(msg){
 ;            $('#chatLog').append(msg+'</p>');
 ;          }

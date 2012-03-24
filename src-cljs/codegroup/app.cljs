@@ -26,6 +26,12 @@
       (fn add-msg [msg]
          (crate/html [:p.event "Received: " + (.-data msg)])))
 
+(defn console-loop []
+  (js/alert "Send")
+  (js/setTimeout console-loop 5000))
+
+;(console-loop)
+
 (event/listen (dm/single-node (dmc/sel "#text"))
               :keypress
               (fn [e]

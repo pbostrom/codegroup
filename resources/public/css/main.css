@@ -3,7 +3,7 @@ body {
 }
 #container{
 	border:5px solid grey;
-	width:800px;
+/*	width:800px;*/
 	margin:0 auto;
 	padding:10px;
 }

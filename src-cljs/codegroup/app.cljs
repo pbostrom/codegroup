@@ -1,4 +1,5 @@
 (ns codegroup.app
+  (:use [codegroup.utils :only (make-js-map)])
   (:require [crate.core :as crate]
             [domina :as dm]
             [domina.css :as dmc]
@@ -7,16 +8,13 @@
             [clojure.string :as string]
             [clojure.browser.event :as event]))
 
-(defn add-msg [msg-el]
-  (gdom/append (dm/single-node (dmc/sel "#chatLog")) msg-el))
 
+(def jq js/jQuery)
 (def ws-url "ws://localhost:8080/socket")
 (def socket (js/WebSocket. ws-url))
-(add-msg (crate/html [:p.event "Outgoing: " [:div#out]]))
 
-(set! (.-onmessage socket)
-      (fn add-msg [msg]
-         (set! (.-innerHTML (dom/get-element :in)) (.-data msg))))
+(defn add-msg [msg-el]
+  (gdom/append (dm/single-node (dmc/sel "#chatLog")) msg-el))
 
 (defn send-it []
   (let [text (.-value (goog.dom/getElement "text"))]
@@ -29,14 +27,34 @@
 
 (defn socket-ready []
   (add-msg 
-    (crate/html [:p.event "Socket Status: " + (str (.-readyState socket)) + " (open) " [:div#in]]))
+    (crate/html 
+      [:p.event "Socket Status: " + 
+       (str (.-readyState socket)) + " (open) " [:div#in]]))
   (console-loop))
-
-(set! (.-onopen socket) socket-ready)
 
 (defn enter-cb [e]
   (if (= (.-keyCode e) 13)
     (send-it)))
+
+(defn init-repl [config]
+  (-> (jq "#console")
+    (.console config)))
+
+(def clj-repl 
+  (make-js-map {:welcomeMessage "Clojure REPL"
+                :promptLabel "user=>"
+                :commandValidate cljValidate
+                :commandHandle cljHandle
+                :autofocus true
+                :animateScroll true
+                :promptHistory true}))
+
+(set! (.-onmessage socket)
+      (fn add-msg [msg]
+         (set! (.-innerHTML (dom/get-element :in)) (.-data msg))))
+(add-msg (crate/html [:p.event "Outgoing: " [:div#out]]))
+
+(set! (.-onopen socket) socket-ready)
 
 (event/listen (dm/single-node (dmc/sel "#text"))
               :keypress

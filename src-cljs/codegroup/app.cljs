@@ -1,5 +1,5 @@
 (ns codegroup.app
-  (:use [codegroup.utils :only (make-js-map)])
+  (:use [codegroup.utils :only (make-js-map clj->js)])
   (:require [crate.core :as crate]
             [domina :as dm]
             [domina.css :as dmc]
@@ -40,15 +40,65 @@
   (-> (jq "#console")
     (.console config)))
 
+(defn cljValidate []
+  false)
+
+(defn cljHandle [line report]
+  make-js-map (array {:msg "\n"
+               :className "jquery-console-message"}))
+
 (def clj-repl 
   (make-js-map {:welcomeMessage "Clojure REPL"
-                :promptLabel "user=>"
+                :promptLabel "user=> "
                 :commandValidate cljValidate
                 :commandHandle cljHandle
                 :autofocus true
                 :animateScroll true
                 :promptHistory true}))
 
+
+(def jqconsole
+  (-> (jq "#console")
+    (.jqconsole "hi\n" "=> " " ")))
+
+(defn startPrompt []
+  (.Prompt jqconsole true (fn [input]
+                            (.Write jqconsole (str input "\n", "jqconsole-output"))
+                            (startPrompt))))
+
+;(init-repl clj-repl)
+;(startPrompt)
+
+(defn paren-match? [sexp]
+  (>=
+    (count (filter #(= % ")") sexp))
+    (count (filter #(= % "(") sexp))))
+
+(def indent-level (atom 0))
+(defn sexp-indent [sexp]
+  (let [sexp-line (.trim jq (last (js->clj (.split sexp "\n"))))
+        indent-vec (reduce 
+                     (fn [v x]
+                       (let [idx (first v)
+                             stack (second v)]
+                         (cond 
+                           (= x "(") [(inc idx) (cons idx stack)]
+                           (= x ")") [(inc idx) (rest stack)]
+                           true [(inc idx) stack]))) 
+                     [0 []] (seq sexp-line))
+        indent-val (- (+ (first (second indent-vec)) 2) @indent-level)]
+    (reset! indent-level indent-val)
+    indent-val))
+
+(defn handler [sexp]
+  (if sexp 
+    (.Write jqconsole (str "==>" sexp "\n")))
+  (.Prompt jqconsole true handler (fn [sexp]
+                                    (if (paren-match? sexp)
+                                      false
+                                      (sexp-indent sexp)))))
+
+(handler nil)
 (set! (.-onmessage socket)
       (fn add-msg [msg]
          (set! (.-innerHTML (dom/get-element :in)) (.-data msg))))

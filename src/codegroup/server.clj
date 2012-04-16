@@ -19,7 +19,6 @@
 
 (defroutes my-app 
   (GET "/" [] (views/layout views/main-view))
-  (GET "/tryclj" [] views/tryclj)
   (GET "/socket" [] (wrap-aleph-handler chat-handler))
   (route/resources "/")
   (route/not-found (views/layout [:p "aww... this doesn't exist"])))

@@ -74,9 +74,12 @@
     (count (filter #(= % ")") sexp))
     (count (filter #(= % "(") sexp))))
 
-(def indent-level (atom 0))
+(.SetIndentWidth jqconsole 1)
+
 (defn sexp-indent [sexp]
-  (let [sexp-line (.trim jq (last (js->clj (.split sexp "\n"))))
+  (let [lines (js->clj (.split sexp "\n"))
+        line (.trim jq (last lines))
+        offset (if (= (count lines) 1) 2 0)
         indent-vec (reduce 
                      (fn [v x]
                        (let [idx (first v)
@@ -85,13 +88,12 @@
                            (= x "(") [(inc idx) (cons idx stack)]
                            (= x ")") [(inc idx) (rest stack)]
                            true [(inc idx) stack]))) 
-                     [0 []] (seq sexp-line))
-        indent-val (- (+ (first (second indent-vec)) 2) @indent-level)]
-    (reset! indent-level indent-val)
+                     [0 []] (seq line))
+        indent-val (+ (first (second indent-vec)) 2 offset)]
     indent-val))
 
 (defn handler [sexp]
-  (if sexp 
+  (if sexp
     (.Write jqconsole (str "==>" sexp "\n")))
   (.Prompt jqconsole true handler (fn [sexp]
                                     (if (paren-match? sexp)
